@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+chan waterFlow;
+chan waterNotFlow;
+chan igniteBurner;
+chan turnOffBurner;
+</declaration>
+	<template>
+		<name x="5" y="5">IC_Controller</name>
+		<declaration>// Place local declarations here.</declaration>
+		<location id="id0" x="-450" y="-170">
+			<name x="-460" y="-204">Ready</name>
+		</location>
+		<location id="id1" x="136" y="-161">
+			<name x="126" y="-195">Ignite</name>
+		</location>
+		<location id="id2" x="127" y="93">
+			<name x="117" y="59">SignalProcess</name>
+		</location>
+		<location id="id3" x="-450" y="85">
+			<name x="-460" y="51">Stop</name>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-246" y="-76">waterNotFlow?</label>
+			<nail x="136" y="-212"/>
+			<nail x="-144" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-450" y="-59">turnOffBurner!</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-272" y="68">waterNotFlow?</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="94" y="-136">waterFlow?</label>
+			<nail x="76" y="93"/>
+			<nail x="76" y="-119"/>
+			<nail x="212" y="-119"/>
+			<nail x="212" y="-161"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="144" y="-51">igniteBurner!</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-263" y="-187">waterFlow?</label>
+		</transition>
+	</template>
+	<template>
+		<name>WaterSensor</name>
+		<parameter>chan &amp;waterFlow</parameter>
+		<declaration>clock delay;</declaration>
+		<location id="id4" x="-331" y="0">
+			<name x="-341" y="-34">WNF</name>
+		</location>
+		<location id="id5" x="51" y="0">
+			<name x="41" y="-34">WF</name>
+		</location>
+		<location id="id6" x="-153" y="187">
+			<name x="-163" y="153">Flowing</name>
+		</location>
+		<init ref="id4"/>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-178" y="255">waterFlow!</label>
+			<nail x="-59" y="255"/>
+			<nail x="-229" y="255"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-313" y="59">delay &gt; 200</label>
+			<label kind="synchronisation" x="-313" y="76">waterNotFlow!</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-135" y="76">waterFlow!</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-204" y="-17">waterFlow!</label>
+			<label kind="assignment" x="-204" y="0">delay = 0</label>
+		</transition>
+	</template>
+	<template>
+		<name>Burner</name>
+		<location id="id7" x="-306" y="-42">
+			<name x="-316" y="-76">BurnerOff</name>
+		</location>
+		<location id="id8" x="8" y="-34">
+			<name x="-2" y="-68">BurnerOn</name>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="127" y="-59">igniteBurner?</label>
+			<nail x="119" y="-127"/>
+			<nail x="119" y="25"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-518" y="-59">turnOffBurner?</label>
+			<nail x="-416" y="-110"/>
+			<nail x="-416" y="25"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-178" y="85">turnOffBurner?</label>
+			<nail x="-144" y="85"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-195" y="-187">igniteBurner?</label>
+			<nail x="-162" y="-161"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+controller = IC_Controller();
+waterSensor = WaterSensor(waterFlow);
+burner = Burner();
+
+// List one or more processes to be composed into a system.
+system waterSensor, controller, burner;
+    </system>
+	<queries>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
